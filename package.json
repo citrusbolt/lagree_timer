@@ -1,0 +1,35 @@
+{
+    "author": "Citrus Bolt",
+    "dependencies": {},
+    "keywords": [],
+    "name": "lagree-timer",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "Lagree Timer",
+        "enableMultiJS": true,
+        "messageKeys": [
+            "ClassDuration"
+        ],
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "emery",
+            "gabbro",
+            "flint"
+        ],
+        "uuid": "21d7a4a1-4e58-4b75-bb82-e54ac7396d5a",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.0.0"
+}
