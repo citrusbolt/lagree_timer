@@ -16,21 +16,21 @@ const int CLASS_DURATION = 45 * 60;
 const int CLASS_TIMER_SEGMENT = CLASS_DURATION / 3;
 const int CLASS_FINAL_SEGMENT = CLASS_TIMER_SEGMENT / 3;
 
-static const uint32_t s_vibe_seg_move[] = { 400 };
+static const uint32_t s_vibe_seg_move[] = { 1000 };
 
 static VibePattern s_vibe_pat_move = {
   .durations = s_vibe_seg_move,
   .num_segments = ARRAY_LENGTH(s_vibe_seg_move),
 };
 
-static const uint32_t s_vibe_seg_warn[] = { 400, 200, 400 };
+static const uint32_t s_vibe_seg_warn[] = { 1000, 200, 1000 };
 
 static VibePattern s_vibe_pat_warn = {
   .durations = s_vibe_seg_warn,
   .num_segments = ARRAY_LENGTH(s_vibe_seg_warn),
 };
 
-static const uint32_t s_vibe_seg_end[] = { 400, 200, 400, 200, 400 };
+static const uint32_t s_vibe_seg_end[] = { 1000, 200, 1000, 200, 1000 };
 
 static VibePattern s_vibe_pat_end = {
   .durations = s_vibe_seg_end,
