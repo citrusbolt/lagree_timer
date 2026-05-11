@@ -16,11 +16,25 @@ const int CLASS_DURATION = 45 * 60;
 const int CLASS_TIMER_SEGMENT = CLASS_DURATION / 3;
 const int CLASS_FINAL_SEGMENT = CLASS_TIMER_SEGMENT / 3;
 
-static const uint32_t segments[] = { 400, 200, 400, 200, 400 };
+static const uint32_t s_vibe_seg_move[] = { 400 };
 
-static VibePattern s_vibe = {
-  .durations = segments,
-  .num_segments = ARRAY_LENGTH(segments),
+static VibePattern s_vibe_pat_move = {
+  .durations = s_vibe_seg_move,
+  .num_segments = ARRAY_LENGTH(s_vibe_seg_move),
+};
+
+static const uint32_t s_vibe_seg_warn[] = { 400, 200, 400 };
+
+static VibePattern s_vibe_pat_warn = {
+  .durations = s_vibe_seg_warn,
+  .num_segments = ARRAY_LENGTH(s_vibe_seg_warn),
+};
+
+static const uint32_t s_vibe_seg_end[] = { 400, 200, 400, 200, 400 };
+
+static VibePattern s_vibe_pat_end = {
+  .durations = s_vibe_seg_end,
+  .num_segments = ARRAY_LENGTH(s_vibe_seg_end),
 };
 
 static void class_timer_callback(void *data) {
@@ -28,11 +42,11 @@ static void class_timer_callback(void *data) {
   layer_mark_dirty(s_bar_layer);
   
   if (s_class_time == CLASS_FINAL_SEGMENT) {
-    vibes_double_pulse();
+    vibes_enqueue_custom_pattern(s_vibe_pat_warn);
     s_class_timer = app_timer_register(1000, class_timer_callback, NULL);
   }
   else if (s_class_time == 0) {
-    vibes_enqueue_custom_pattern(s_vibe);
+    vibes_enqueue_custom_pattern(s_vibe_pat_end);
   }
   else {
     s_class_timer = app_timer_register(1000, class_timer_callback, NULL);
@@ -45,7 +59,7 @@ static void move_timer_callback(void *data) {
   text_layer_set_text(s_text_layer, s_timer_buf);
   
   if (s_move_time == 0) {
-    vibes_short_pulse();
+    vibes_enqueue_custom_pattern(s_vibe_pat_move);
   }
   else {
     s_move_timer = app_timer_register(1000, move_timer_callback, NULL);
