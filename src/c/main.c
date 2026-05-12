@@ -2,6 +2,8 @@
 
 static Window *s_main_window;
 static TextLayer *s_text_layer;
+static TextLayer *s_class_layer;
+static TextLayer *s_time_layer;
 static Layer *s_bar_layer;
 
 static AppTimer *s_class_timer;
@@ -10,6 +12,7 @@ static AppTimer *s_move_timer;
 static int s_class_time;
 static int s_move_time;
 
+static char *s_class_buf;
 static char *s_timer_buf;
 
 const int CLASS_DURATION = 45 * 60;
@@ -39,6 +42,8 @@ static VibePattern s_vibe_pat_end = {
 
 static void class_timer_callback(void *data) {
   s_class_time--;
+  snprintf(s_class_buf, 6, (s_class_time % 60) < 10 ? "%u:0%u" : "%u:%u", s_class_time / 60, s_class_time % 60);
+  text_layer_set_text(s_class_layer, s_class_buf);
   layer_mark_dirty(s_bar_layer);
   
   if (s_class_time == CLASS_FINAL_SEGMENT) {
@@ -64,6 +69,20 @@ static void move_timer_callback(void *data) {
   else {
     s_move_timer = app_timer_register(1000, move_timer_callback, NULL);
   }
+}
+
+static void update_time() {
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+
+  static char s_time_buffer[8];
+  strftime(s_time_buffer, sizeof(s_time_buffer), clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
+
+  text_layer_set_text(s_time_layer, s_time_buffer);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_time();
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -159,10 +178,21 @@ static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
+  s_class_layer = text_layer_create(GRect(0, 20, bounds.size.w, 80));
+  text_layer_set_font(s_class_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  text_layer_set_text_alignment(s_class_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(s_class_layer));
+  snprintf(s_class_buf, 6, "%u:%u", s_class_time / 60, s_class_time % 60);
+
   s_text_layer = text_layer_create(GRect(0, 80, bounds.size.w, 80));
   text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
+
+  s_time_layer = text_layer_create(GRect(0, 200, bounds.size.w, 80));
+  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
 
   s_bar_layer = layer_create(GRect(0, 0, bounds.size.w, bounds.size.h));
   layer_set_update_proc(s_bar_layer, bar_update_proc);
@@ -174,6 +204,7 @@ static void main_window_unload(Window *window) {
 }
 
 static void init(void) {
+  s_class_buf = malloc(8);
   s_timer_buf = malloc(6);
   s_class_time = CLASS_DURATION;
   s_class_timer = app_timer_register(1000, class_timer_callback, NULL);
@@ -185,6 +216,8 @@ static void init(void) {
   });
   window_stack_push(s_main_window, true);
   light_enable(true);
+  update_time();
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
 
 static void deinit(void) {
